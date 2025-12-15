@@ -3,15 +3,16 @@
 # ============================================
 # GT-customterminal - Terminal Customization Tool
 # Developer: SalehGNUTUX
-# Version: 1.0.2
+# Version: 1.0.4
 # Repository: https://github.com/SalehGNUTUX/gt-customterminal
 # ============================================
 
 # معلومات الأداة
 TOOL_NAME="GT-customterminal"
 DEV_NAME="SalehGNUTUX"
-VERSION="1.0.2"
+VERSION="1.0.4"
 REPO_URL="https://github.com/SalehGNUTUX/gt-customterminal"
+SCRIPT_URL="https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/gt-customterminal.sh"
 
 # المسارات
 INSTALL_DIR="/usr/local/bin"
@@ -20,6 +21,8 @@ BACKUP_DIR="$CONFIG_DIR/backups"
 LOG_FILE="$CONFIG_DIR/gt-terminal.log"
 LANG_FILE="$CONFIG_DIR/language"
 VERSION_FILE="$CONFIG_DIR/version"
+SWAP_CONFIG="$CONFIG_DIR/swap-config"
+SCRIPT_PATH="$(realpath "$0")"
 
 # نظام اللغة
 LANG_MODE="AR"
@@ -49,7 +52,7 @@ AR_MESSAGES=(
     "welcome=مرحباً! جميع العمليات تخضع للنسخ الاحتياطي التلقائي"
     "restore_note=يمكنك استرجاع إعداداتك في أي وقت من الخيار 7"
     "menu_title=🛡️  $TOOL_NAME v$VERSION - بأمان كامل"
-    "choose_option=اختر خياراً [0-9]: "
+    "choose_option=اختر خياراً [0-11]: "
     "press_enter=اضغط Enter للمتابعة... "
     "success=✓ تم بنجاح:"
     "error=✗ خطأ:"
@@ -154,6 +157,35 @@ AR_MESSAGES=(
     "update_done=✓ تم التحديث بنجاح إلى الإصدار"
     "update_failed=✗ فشل التحديث"
     "update_restart=🔄 جاري إعادة تشغيل الأداة..."
+    "uninstall_tool=🗑️  إلغاء تثبيت الأداة..."
+    "uninstall_confirm=هل تريد إلغاء تثبيت الأداة؟"
+    "uninstall_done=✓ تم إلغاء التثبيت بنجاح"
+    "keep_config=هل تريد الاحتفاظ بملفات الإعدادات؟"
+    "config_kept=✓ تم الاحتفاظ بملفات الإعدادات في"
+    "config_removed=✓ تم حذف جميع ملفات الإعدادات"
+    "restart_terminal=🔄 يرجى إعادة فتح الطرفية لتطبيق التغييرات"
+    "swap_menu=💾 إدارة مساحة الإبدال (Swap)"
+    "swap_option1=1. إعداد ZRAM (مضغوط)"
+    "swap_option2=2. إنشاء ملف Swap تقليدي"
+    "swap_option3=3. عرض حالة Swap الحالية"
+    "swap_option4=4. إلغاء تهيئة Swap"
+    "back_to_main=↩️  العودة للقائمة الرئيسية"
+    "choose_swap=اختر خياراً [0-4]: "
+    "zram_installing=📦 جاري تثبيت وإعداد ZRAM..."
+    "enter_swap_size=أدخل حجم مساحة الإبدال بالغيغابايت (GB): "
+    "swap_created=✓ تم إنشاء مساحة إبدال بحجم"
+    "swap_exists=⚠ مساحة الإبدال موجودة مسبقاً"
+    "swap_removed=✓ تم إزالة مساحة الإبدال"
+    "no_swap=⚠ لا توجد مساحة إبدال مثبتة"
+    "current_swap_status=📊 حالة Swap الحالية:"
+    "swap_total=الحجم الكلي:"
+    "swap_used=المستخدم:"
+    "swap_free=المتاح:"
+    "swap_percent=النسبة:"
+    "gb=جيجابايت"
+    "mb=ميجابايت"
+    "confirm_remove=هل تريد إزالة مساحة الإبدال؟"
+    "operation_completed=✓ تمت العملية بنجاح"
 )
 
 # رسائل بالإنجليزية
@@ -161,7 +193,7 @@ EN_MESSAGES=(
     "welcome=Welcome! All operations include automatic backup"
     "restore_note=You can restore your settings anytime from option 7"
     "menu_title=🛡️  $TOOL_NAME v$VERSION - Safe Customization"
-    "choose_option=Choose option [0-9]: "
+    "choose_option=Choose option [0-11]: "
     "press_enter=Press Enter to continue... "
     "success=✓ Success:"
     "error=✗ Error:"
@@ -266,6 +298,35 @@ EN_MESSAGES=(
     "update_done=✓ Updated successfully to version"
     "update_failed=✗ Update failed"
     "update_restart=🔄 Restarting the tool..."
+    "uninstall_tool=🗑️  Uninstalling tool..."
+    "uninstall_confirm=Do you want to uninstall the tool?"
+    "uninstall_done=✓ Uninstall completed successfully"
+    "keep_config=Keep configuration files?"
+    "config_kept=✓ Configuration files kept in"
+    "config_removed=✓ All configuration files removed"
+    "restart_terminal=🔄 Please restart your terminal to apply changes"
+    "swap_menu=💾 Swap Space Management"
+    "swap_option1=1. Setup ZRAM (Compressed)"
+    "swap_option2=2. Create traditional Swap file"
+    "swap_option3=3. Show current Swap status"
+    "swap_option4=4. Remove Swap configuration"
+    "back_to_main=↩️  Back to main menu"
+    "choose_swap=Choose option [0-4]: "
+    "zram_installing=📦 Installing and configuring ZRAM..."
+    "enter_swap_size=Enter swap size in gigabytes (GB): "
+    "swap_created=✓ Swap space created with size"
+    "swap_exists=⚠ Swap space already exists"
+    "swap_removed=✓ Swap space removed"
+    "no_swap=⚠ No swap space configured"
+    "current_swap_status=📊 Current Swap Status:"
+    "swap_total=Total size:"
+    "swap_used=Used:"
+    "swap_free=Free:"
+    "swap_percent=Percentage:"
+    "gb=GB"
+    "mb=MB"
+    "confirm_remove=Do you want to remove swap space?"
+    "operation_completed=✓ Operation completed successfully"
 )
 
 # دالة الترجمة
@@ -366,6 +427,25 @@ detect_package_manager() {
     fi
 }
 
+# دالة الحصول على معلومات Swap (آمنة بدون أخطاء)
+get_swap_info() {
+    local swap_info=$(free -h | grep -i swap || echo "Swap: 0B 0B 0B")
+
+    # استخراج المعلومات بطريقة آمنة
+    local swap_total=$(echo "$swap_info" | awk '{print $2}')
+    local swap_used=$(echo "$swap_info" | awk '{print $3}')
+    local swap_free=$(echo "$swap_info" | awk '{print $4}')
+
+    # إذا لم توجد معلومات swap
+    if [ -z "$swap_total" ] || [ "$swap_total" = "0B" ]; then
+        swap_total="0"
+        swap_used="0"
+        swap_free="0"
+    fi
+
+    echo "$swap_total|$swap_used|$swap_free"
+}
+
 # النسخ الاحتياطي للملف
 backup_file() {
     local file_path=$1
@@ -426,6 +506,290 @@ restore_file() {
         print_error "$(translate "backup_not_found")"
         return 1
     fi
+}
+
+# ============================================
+# إدارة Swap/ZRAM
+# ============================================
+
+# إظهار حالة Swap الحالية
+show_swap_status() {
+    echo ""
+    echo "$(translate "current_swap_status")"
+    echo "═════════════════════════════════════════"
+
+    # استخدام دالة آمنة للحصول على معلومات swap
+    local swap_info=$(get_swap_info)
+    local swap_total=$(echo "$swap_info" | cut -d'|' -f1)
+    local swap_used=$(echo "$swap_info" | cut -d'|' -f2)
+    local swap_free=$(echo "$swap_info" | cut -d'|' -f3)
+
+    if [ "$swap_total" = "0" ] || [ -z "$swap_total" ]; then
+        print_warning "$(translate "no_swap")"
+    else
+        echo "$(translate "swap_total") $swap_total"
+        echo "$(translate "swap_used") $swap_used"
+        echo "$(translate "swap_free") $swap_free"
+
+        # حساب النسبة المئوية إذا أمكن
+        if [ "$swap_total" != "0" ] && [ "$swap_used" != "0" ]; then
+            # تحويل إلى بايت أولاً للحساب
+            local total_mb=$(echo "$swap_total" | sed 's/[^0-9.]//g')
+            local used_mb=$(echo "$swap_used" | sed 's/[^0-9.]//g')
+
+            if [[ "$total_mb" =~ ^[0-9.]+$ ]] && [[ "$used_mb" =~ ^[0-9.]+$ ]] && [ $(echo "$total_mb > 0" | bc -l 2>/dev/null || echo "0") = "1" ]; then
+                local percent=$(echo "scale=1; $used_mb * 100 / $total_mb" | bc 2>/dev/null || echo "0")
+                echo "$(translate "swap_percent") ${percent}%"
+            fi
+        fi
+    fi
+
+    echo "═════════════════════════════════════════"
+
+    # إظهار معلومات إضافية
+    echo ""
+    echo "📋 معلومات إضافية:"
+    echo "─────────────────────────────────────────"
+    swapon --show 2>/dev/null || echo "لا توجد معلومات تفصيلية متاحة"
+    echo "─────────────────────────────────────────"
+}
+
+# إعداد ZRAM
+setup_zram() {
+    print_info "$(translate "zram_installing")"
+
+    # التحقق من وجود swap حالياً
+    local current_swap=$(swapon --show | wc -l)
+    if [ "$current_swap" -gt 1 ]; then
+        print_warning "$(translate "swap_exists")"
+        show_swap_status
+        return 1
+    fi
+
+    echo ""
+    read -p "$(translate "enter_swap_size")" swap_size
+
+    # التحقق من صحة المدخل
+    if ! [[ "$swap_size" =~ ^[0-9]+$ ]] || [ "$swap_size" -lt 1 ] || [ "$swap_size" -gt 32 ]; then
+        print_error "$(if [ "$LANG_MODE" = "EN" ]; then echo "Invalid size. Please enter a number between 1 and 32 GB"; else echo "حجم غير صالح. الرجاء إدخال رقم بين 1 و 32 جيجابايت"; fi)"
+        return 1
+    fi
+
+    # تثبيت zram-tools إذا لم يكن مثبتاً
+    pkg_manager=$(detect_package_manager)
+
+    case $pkg_manager in
+        apt)
+            sudo apt update && sudo apt install -y zram-tools
+            ;;
+        pacman)
+            sudo pacman -S --noconfirm zram-generator
+            ;;
+        dnf)
+            sudo dnf install -y zram-generator
+            ;;
+        yum)
+            sudo yum install -y zram-generator
+            ;;
+        *)
+            print_error "$(translate "pkg_not_supported")"
+            return 1
+            ;;
+    esac
+
+    if [ $? -ne 0 ]; then
+        print_error "$(if [ "$LANG_MODE" = "EN" ]; then echo "Failed to install ZRAM tools"; else echo "فشل تثبيت أدوات ZRAM"; fi)"
+        return 1
+    fi
+
+    # تهيئة ZRAM
+    local mem_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+    local zram_size=$((swap_size * 1024 * 1024)) # تحويل إلى كيلوبايت
+
+    # إنشاء ملف إعدادات ZRAM
+    sudo tee /etc/default/zram-swap << EOF
+# ZRAM configuration - GT-customterminal
+ALGO=lz4
+PERCENT=50
+PRIORITY=100
+EOF
+
+    # إعادة تشغيل خدمة ZRAM
+    if systemctl list-unit-files | grep -q zram; then
+        sudo systemctl restart zram-swap
+    else
+        sudo modprobe zram
+        echo "zram" | sudo tee /etc/modules-load.d/zram.conf
+        sudo systemctl daemon-reload
+    fi
+
+    print_success "$(translate "swap_created") ${swap_size}$(translate "gb")"
+    log "SWAP: ZRAM configured with ${swap_size}GB"
+
+    show_swap_status
+}
+
+# إنشاء ملف swap تقليدي
+create_swap_file() {
+    print_info "$(if [ "$LANG_MODE" = "EN" ]; then echo "Creating traditional swap file..."; else echo "جاري إنشاء ملف swap تقليدي..."; fi)"
+
+    # التحقق من وجود swap حالياً
+    local current_swap=$(swapon --show | wc -l)
+    if [ "$current_swap" -gt 1 ]; then
+        print_warning "$(translate "swap_exists")"
+        show_swap_status
+        return 1
+    fi
+
+    echo ""
+    read -p "$(translate "enter_swap_size")" swap_size
+
+    # التحقق من صحة المدخل
+    if ! [[ "$swap_size" =~ ^[0-9]+$ ]] || [ "$swap_size" -lt 1 ] || [ "$swap_size" -gt 32 ]; then
+        print_error "$(if [ "$LANG_MODE" = "EN" ]; then echo "Invalid size. Please enter a number between 1 and 32 GB"; else echo "حجم غير صالح. الرجاء إدخال رقم بين 1 و 32 جيجابايت"; fi)"
+        return 1
+    fi
+
+    # حساب الحجم بالميجابايت
+    local swap_mb=$((swap_size * 1024))
+
+    # إنشاء ملف swap
+    sudo fallocate -l ${swap_size}G /swapfile
+    if [ $? -ne 0 ]; then
+        # إذا فشل fallocate، استخدم dd
+        sudo dd if=/dev/zero of=/swapfile bs=1M count=$swap_mb
+    fi
+
+    # تعيين الصلاحيات
+    sudo chmod 600 /swapfile
+
+    # تهيئة swap
+    sudo mkswap /swapfile
+    sudo swapon /swapfile
+
+    # إضافة إلى fstab للتشغيل التلقائي
+    echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+    # ضبط swappiness (اختياري)
+    echo 'vm.swappiness=10' | sudo tee -a /etc/sysctl.conf
+    sudo sysctl -p
+
+    print_success "$(translate "swap_created") ${swap_size}$(translate "gb")"
+    log "SWAP: Traditional swap file created with ${swap_size}GB"
+
+    show_swap_status
+}
+
+# إزالة swap
+remove_swap() {
+    echo ""
+    read -p "$(translate "confirm_remove") (y/n): " confirm_remove
+
+    if [ "$confirm_remove" != "y" ] && [ "$confirm_remove" != "Y" ]; then
+        print_warning "$(translate "operation_cancelled")"
+        return
+    fi
+
+    # إيقاف swap الحالي
+    sudo swapoff -a
+
+    # إزالة ملف swap إذا كان موجوداً
+    if [ -f "/swapfile" ]; then
+        sudo rm -f /swapfile
+        # إزالة من fstab
+        sudo sed -i '/\/swapfile/d' /etc/fstab
+    fi
+
+    # إيقاف ZRAM إذا كان مفعلاً
+    if systemctl list-unit-files | grep -q zram; then
+        sudo systemctl stop zram-swap
+        sudo systemctl disable zram-swap
+    fi
+
+    print_success "$(translate "swap_removed")"
+    log "SWAP: Swap configuration removed"
+
+    show_swap_status
+}
+
+# قائمة إدارة swap
+swap_management_menu() {
+    while true; do
+        echo ""
+        echo "$(translate "swap_menu")"
+        echo "═════════════════════════════════════════"
+        echo "$(translate "swap_option1")"
+        echo "$(translate "swap_option2")"
+        echo "$(translate "swap_option3")"
+        echo "$(translate "swap_option4")"
+        echo "0. $(translate "back_to_main")"
+        echo "═════════════════════════════════════════"
+
+        read -p "$(translate "choose_swap")" swap_choice
+
+        case $swap_choice in
+            1) setup_zram ;;
+            2) create_swap_file ;;
+            3) show_swap_status ;;
+            4) remove_swap ;;
+            0) break ;;
+            *) print_error "$(translate "error") $(if [ "$LANG_MODE" = "EN" ]; then echo "Invalid option"; else echo "خيار غير صحيح"; fi)" ;;
+        esac
+
+        echo ""
+        read -p "$(translate "press_enter")" dummy
+    done
+}
+
+# ============================================
+# إلغاء التثبيت
+# ============================================
+
+uninstall_tool() {
+    print_info "$(translate "uninstall_tool")"
+
+    if [ "$LANG_MODE" = "EN" ]; then
+        read -p "$(translate "uninstall_confirm") (y/n): " confirm_uninstall
+    else
+        read -p "$(translate "uninstall_confirm") (y/n): " confirm_uninstall
+    fi
+
+    if [ "$confirm_uninstall" != "y" ] && [ "$confirm_uninstall" != "Y" ]; then
+        print_warning "$(translate "operation_cancelled")"
+        return
+    fi
+
+    # إزالة الملفات النظامية
+    if [ -f "$INSTALL_DIR/gt-terminal" ]; then
+        sudo rm -f "$INSTALL_DIR/gt-terminal"
+        print_success "$(if [ "$LANG_MODE" = "EN" ]; then echo "Removed: $INSTALL_DIR/gt-terminal"; else echo "تم إزالة: $INSTALL_DIR/gt-terminal"; fi)"
+    fi
+
+    if [ -f "/usr/local/bin/gt-term" ]; then
+        sudo rm -f "/usr/local/bin/gt-term"
+        print_success "$(if [ "$LANG_MODE" = "EN" ]; then echo "Removed: /usr/local/bin/gt-term"; else echo "تم إزالة: /usr/local/bin/gt-term"; fi)"
+    fi
+
+    # سؤال عن إبقاء ملفات الإعدادات
+    if [ "$LANG_MODE" = "EN" ]; then
+        read -p "$(translate "keep_config") (y/n): " keep_config
+    else
+        read -p "$(translate "keep_config") (y/n): " keep_config
+    fi
+
+    if [ "$keep_config" = "y" ] || [ "$keep_config" = "Y" ]; then
+        print_success "$(translate "config_kept") $CONFIG_DIR"
+        log "UNINSTALL: Tool uninstalled, config kept"
+    else
+        rm -rf "$CONFIG_DIR"
+        print_success "$(translate "config_removed")"
+        log "UNINSTALL: Tool uninstalled, config removed"
+    fi
+
+    print_success "$(translate "uninstall_done")"
+    print_info "$(translate "restart_terminal")"
+
+    exit 0
 }
 
 # ============================================
@@ -666,7 +1030,7 @@ install_helpers() {
     fi
 }
 
-# تخصيص الطرفية
+# تخصيص الطرفية (بدون مشاكل في عرض القرص)
 customize_terminal() {
     print_info "$(translate "customizing") $(if [ "$LANG_MODE" = "EN" ]; then echo "terminal appearance"; else echo "مظهر الطرفية"; fi)"
 
@@ -787,37 +1151,36 @@ echo -e "👥 \033[1;34mالمستخدمون:\033[0m        \033[1;32m$(who | wc
 echo'
             fi
             ;;
-        5)
+                5)
             if [ "$LANG_MODE" = "EN" ]; then
-                welcome_message='echo -e "\033[1;36m
-════════════════════════════════════════════════════════════
-              🚀 SYSTEM DASHBOARD
-════════════════════════════════════════════════════════════
-👤 \033[1;34mUser:\033[0m \033[1;32m$(whoami)\033[0m
-🐧 \033[1;34mOS:\033[0m   \033[1;32m$(lsb_release -ds 2>/dev/null || cat /etc/*release 2>/dev/null | head -n1)\033[0m
-🏗️  \033[1;34mKernel:\033[0m \033[1;32m$(uname -r)\033[0m
-⏰ \033[1;34mUptime:\033[0m \033[1;32m$(uptime -p | sed '"'"'s/up //'"'"')\033[0m
-🔥 \033[1;34mCPU:\033[0m    \033[1;32m$(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | cut -d"'"%"'" -f1)%\033[0m
-💾 \033[1;34mRAM:\033[0m    \033[1;32m$(free -m | awk "/Mem:/ {printf \"%d/%dMB\", \$3, \$2}")\033[0m
-💿 \033[1;34mDisk:\033[0m   \033[1;32m$(df -h / | awk "NR==2 {print \$4 " free of " \$2}")\033[0m
-📅 \033[1;34mDate:\033[0m   \033[1;32m$(date +"%Y-%m-%d %H:%M:%S")\033[0m
-════════════════════════════════════════════════════════════\033[0m"
-echo'
+                welcome_message='echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
+echo -e "\033[1;36m              🚀 SYSTEM DASHBOARD\033[0m"
+echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
+echo -e "👤  \033[1;34mUser:\033[0m    \033[1;32m$(whoami)\033[0m"
+echo -e "🐧  \033[1;34mOS:\033[0m      \033[1;32m$(lsb_release -ds 2>/dev/null || cat /etc/*release 2>/dev/null | head -n1)\033[0m"
+echo -e "🏗️   \033[1;34mKernel:\033[0m \033[1;32m$(uname -r)\033[0m"
+echo -e "⏰  \033[1;34mUptime:\033[0m  \033[1;32m$(uptime -p | sed '"'"'s/up //'"'"')\033[0m"
+echo -e "🔥  \033[1;34mCPU:\033[0m     \033[1;32m$(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | cut -d"'"%"'" -f1)%\033[0m"
+echo -e "💾  \033[1;34mRAM:\033[0m     \033[1;32m$(free -m | awk "/Mem:/ {printf \"%d/%dMB\", \$3, \$2}")\033[0m"
+echo -e "💾  \033[1;34mSwap:\033[0m    \033[1;32m$(free -h | grep -i swap | awk "{print \$3 \"/\" \$2}" || echo "0/0")\033[0m"
+echo -e "📅  \033[1;34mDate:\033[0m    \033[1;32m$(date +"%Y-%m-%d %H:%M:%S")\033[0m"
+echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"'
             else
-                welcome_message='echo -e "\033[1;36m
-════════════════════════════════════════════════════════════
-              🚀 لوحة معلومات النظام الشاملة
-════════════════════════════════════════════════════════════
-👤 \033[1;34mالمستخدم:\033[0m \033[1;32m$(whoami)\033[0m
-🐧 \033[1;34mالنظام:\033[0m    \033[1;32m$(lsb_release -ds 2>/dev/null || cat /etc/*release 2>/dev/null | head -n1)\033[0m
-🏗️  \033[1;34mالنواة:\033[0m  \033[1;32m$(uname -r)\033[0m
-⏰ \033[1;34mمدة التشغيل:\033[0m \033[1;32m$(uptime -p | sed '"'"'s/up //'"'"')\033[0m
-🔥 \033[1;34mالمعالج:\033[0m  \033[1;32m$(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | cut -d"'"%"'" -f1)%\033[0m
-💾 \033[1;34mالذاكرة:\033[0m  \033[1;32m$(free -m | awk "/Mem:/ {printf \"%d/%d ميجابايت\", \$3, \$2}")\033[0m
-💿 \033[1;34mالقرص:\033[0m     \033[1;32m$(df -h / | awk "NR==2 {print \$4 " متاح من " \$2}")\033[0m
-📅 \033[1;34mالتاريخ:\033[0m  \033[1;32m$(date +"%Y-%m-%d %H:%M:%S")\033[0m
-════════════════════════════════════════════════════════════\033[0m"
-echo'
+                # Arabic version - Title in Arabic, content in English
+                welcome_message='{
+echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
+echo -e "\033[1;36m              🚀 لوحة معلومات النظام الشاملة\033[0m"
+echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
+echo -e "👤  \033[1;34mUser:\033[0m    \033[1;32m$(whoami)\033[0m"
+echo -e "🐧  \033[1;34mOS:\033[0m      \033[1;32m$(lsb_release -ds 2>/dev/null || cat /etc/*release 2>/dev/null | head -n1)\033[0m"
+echo -e "🏗️   \033[1;34mKernel:\033[0m \033[1;32m$(uname -r)\033[0m"
+echo -e "⏰  \033[1;34mUptime:\033[0m  \033[1;32m$(uptime -p | sed '"'"'s/up //'"'"')\033[0m"
+echo -e "🔥  \033[1;34mCPU:\033[0m     \033[1;32m$(top -bn1 | grep "Cpu(s)" | awk "{print \$2}" | cut -d"'"%"'" -f1)%\033[0m"
+echo -e "💾  \033[1;34mRAM:\033[0m     \033[1;32m$(free -m | awk "/Mem:/ {printf \"%d/%dMB\", \$3, \$2}")\033[0m"
+echo -e "💾  \033[1;34mSwap:\033[0m    \033[1;32m$(free -h | grep -i swap | awk "{print \$3 \"/\" \$2}" || echo "0/0")\033[0m"
+echo -e "📅  \033[1;34mDate:\033[0m    \033[1;32m$(date +"%Y-%m-%d %H:%M:%S")\033[0m"
+echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
+}'
             fi
             ;;
         C|c)
@@ -876,10 +1239,19 @@ EOF
 
     print_success "$(translate "terminal_done")"
 
+    # عرض معاينة بدون أخطاء
     echo ""
     echo "$(translate "preview_next")"
     echo "═════════════════════════════════════════"
-    eval "$welcome_message"
+
+    # تشغيل الرسالة الترحيبية في بيئة محمية
+    if [[ "$welcome_message" == *"SWAP_INFO"* ]]; then
+        # بالنسبة للنمط الخامس، استخدم eval مع بيئة محمية
+        eval "$(echo "$welcome_message" | sed '/SWAP_INFO=/d')"
+    else
+        eval "$welcome_message"
+    fi
+
     echo "═════════════════════════════════════════"
 
     log "CONFIG: Terminal customization applied (Style: $style_choice)"
@@ -1091,29 +1463,22 @@ update_tool() {
     rm -rf "$temp_dir"
     mkdir -p "$temp_dir"
 
-    if command -v git &> /dev/null; then
-        if git clone "$REPO_URL.git" "$temp_dir" 2>/dev/null; then
-            print_success "$(translate "success") $(if [ "$LANG_MODE" = "EN" ]; then echo "Files downloaded using git"; else echo "تم تنزيل الملفات باستخدام git"; fi)"
-        else
-            print_error "$(translate "update_failed")"
-            return 1
-        fi
-    elif command -v curl &> /dev/null; then
-        if curl -L "$REPO_URL/archive/main.tar.gz" 2>/dev/null | tar xz -C "$temp_dir" --strip-components=1 2>/dev/null; then
-            print_success "$(translate "success") $(if [ "$LANG_MODE" = "EN" ]; then echo "Files downloaded using curl"; else echo "تم تنزيل الملفات باستخدام curl"; fi)"
+    if command -v curl &> /dev/null; then
+        if curl -s "$SCRIPT_URL" -o "$temp_dir/gt-customterminal.sh"; then
+            print_success "$(translate "success") $(if [ "$LANG_MODE" = "EN" ]; then echo "File downloaded successfully"; else echo "تم تنزيل الملف بنجاح"; fi)"
         else
             print_error "$(translate "update_failed")"
             return 1
         fi
     elif command -v wget &> /dev/null; then
-        if wget -qO- "$REPO_URL/archive/main.tar.gz" 2>/dev/null | tar xz -C "$temp_dir" --strip-components=1 2>/dev/null; then
-            print_success "$(translate "success") $(if [ "$LANG_MODE" = "EN" ]; then echo "Files downloaded using wget"; else echo "تم تنزيل الملفات باستخدام wget"; fi)"
+        if wget -q "$SCRIPT_URL" -O "$temp_dir/gt-customterminal.sh"; then
+            print_success "$(translate "success") $(if [ "$LANG_MODE" = "EN" ]; then echo "File downloaded successfully"; else echo "تم تنزيل الملف بنجاح"; fi)"
         else
             print_error "$(translate "update_failed")"
             return 1
         fi
     else
-        print_error "$(translate "error") $(if [ "$LANG_MODE" = "EN" ]; then echo "Cannot update - need git, curl or wget"; else echo "لا يمكن التحديث - يحتاج git أو curl أو wget"; fi)"
+        print_error "$(translate "error") $(if [ "$LANG_MODE" = "EN" ]; then echo "Cannot update - need curl or wget"; else echo "لا يمكن التحديث - يحتاج curl أو wget"; fi)"
         return 1
     fi
 
@@ -1125,9 +1490,11 @@ update_tool() {
         sudo cp "$temp_dir/gt-customterminal.sh" "$INSTALL_DIR/gt-terminal"
         sudo chmod +x "$INSTALL_DIR/gt-terminal"
 
-        if [ -f "$temp_dir/version.txt" ]; then
-            cp "$temp_dir/version.txt" "$VERSION_FILE"
-            VERSION=$(cat "$temp_dir/version.txt")
+        # تحديث رقم الإصدار من الملف المنزّل
+        local downloaded_version=$(grep -m1 "VERSION=" "$temp_dir/gt-customterminal.sh" | cut -d'"' -f2)
+        if [ -n "$downloaded_version" ]; then
+            echo "$downloaded_version" > "$VERSION_FILE"
+            VERSION="$downloaded_version"
         fi
 
         sudo ln -sf "$INSTALL_DIR/gt-terminal" "/usr/local/bin/gt-term" 2>/dev/null
@@ -1223,7 +1590,19 @@ self_install() {
         return 1
     fi
 
-    sudo cp "$0" "$INSTALL_DIR/gt-terminal"
+    # حفظ المسار الحالي للنسخ الاحتياطي
+    local current_script="$SCRIPT_PATH"
+
+    if [ ! -f "$current_script" ]; then
+        current_script="$0"
+    fi
+
+    # إنشاء نسخة احتياطية من الملف الحالي
+    local backup_file="/tmp/gt-customterminal-backup.sh"
+    cp "$current_script" "$backup_file"
+
+    # استخدام النسخة الاحتياطية للتثبيت
+    sudo cp "$backup_file" "$INSTALL_DIR/gt-terminal"
     sudo chmod +x "$INSTALL_DIR/gt-terminal"
 
     sudo ln -sf "$INSTALL_DIR/gt-terminal" "/usr/local/bin/gt-term" 2>/dev/null
@@ -1242,6 +1621,9 @@ self_install() {
 
     if [ "$run_choice" = "y" ] || [ "$run_choice" = "Y" ]; then
         exec gt-terminal
+    else
+        echo ""
+        print_info "$(translate "restart_terminal")"
     fi
 }
 
@@ -1262,6 +1644,8 @@ ${CYAN}$(if [ "$LANG_MODE" = "EN" ]; then echo "Language: English (EN)"; else ec
 7. 💾 $(if [ "$LANG_MODE" = "EN" ]; then echo "Restore settings"; else echo "استرجاع الإعدادات"; fi)
 8. 🔄 $(if [ "$LANG_MODE" = "EN" ]; then echo "Update tool"; else echo "تحديث الأداة"; fi)
 9. 🌐 $(if [ "$LANG_MODE" = "EN" ]; then echo "Change language"; else echo "تغيير اللغة"; fi)
+10. 💾 $(if [ "$LANG_MODE" = "EN" ]; then echo "Swap Management"; else echo "إدارة مساحة الإبدال"; fi)
+11. 🗑️  $(if [ "$LANG_MODE" = "EN" ]; then echo "Uninstall tool"; else echo "إلغاء تثبيت الأداة"; fi)
 0. 🚪 $(if [ "$LANG_MODE" = "EN" ]; then echo "Exit"; else echo "الخروج"; fi)
 ═════════════════════════════════════════"
 }
@@ -1270,6 +1654,7 @@ ${CYAN}$(if [ "$LANG_MODE" = "EN" ]; then echo "Language: English (EN)"; else ec
 main() {
     init_system
 
+    # إذا كان السكربت يُشغل مباشرة ولم يكن مثبتاً نظامياً
     if [[ "$0" == *"gt-customterminal.sh" ]] && [ ! -f "$INSTALL_DIR/gt-terminal" ]; then
         echo ""
         print_color "$YELLOW" "$(translate "direct_script")"
@@ -1310,6 +1695,8 @@ main() {
             7) show_restore_menu ;;
             8) update_tool ;;
             9) change_language ;;
+            10) swap_management_menu ;;
+            11) uninstall_tool ;;
             0)
                 echo ""
                 print_color "$GREEN" "$(translate "thank_you")"

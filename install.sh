@@ -3,7 +3,7 @@
 # ============================================
 # GT-customterminal Installer
 # Developer: SalehGNUTUX
-# Version: 1.0.7
+# Version: 1.0.8
 # ============================================
 
 # الألوان
@@ -23,7 +23,7 @@ print_info() { print_color "$BLUE" "🔍 $1"; }
 clear
 echo ""
 print_color "$CYAN" "════════════════════════════════════════════════════════════"
-print_color "$CYAN" "           🛠️  GT-customterminal Installer v1.0.7"
+print_color "$CYAN" "           🛠️  GT-customterminal Installer v1.0.8"
 print_color "$CYAN" "           👨‍💻  Developer: SalehGNUTUX"
 print_color "$CYAN" "           🌐  https://github.com/SalehGNUTUX/gt-customterminal"
 print_color "$CYAN" "════════════════════════════════════════════════════════════"
@@ -68,6 +68,7 @@ case $lang_choice in
         LANG_MODE="EN"
         AR_MODE=false
         echo -e "${YELLOW}⚠${NC} Using default language (English)"
+        # تعيين الرسائل الافتراضية للإنجليزية
         MSG_CHECK="🔍 Checking internet connection..."
         MSG_CONNECTION_OK="✅ Internet connection OK"
         MSG_NO_INTERNET="❌ No internet connection"
@@ -153,7 +154,7 @@ for file_entry in "${FILES[@]}"; do
 done
 
 # إنشاء ملف الإصدار
-echo "1.0.7" > version.txt
+echo "1.0.8" > version.txt
 echo -e "🔢 version.txt           ... ${GREEN}✓${NC} (created locally)"
 
 echo "════════════════════════════════════════════════════════════"

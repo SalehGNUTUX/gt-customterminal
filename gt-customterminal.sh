@@ -13,7 +13,6 @@ DEV_NAME="SalehGNUTUX"
 VERSION="1.0.4"
 REPO_URL="https://github.com/SalehGNUTUX/gt-customterminal"
 SCRIPT_URL="https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/gt-customterminal.sh"
-
 # المسارات
 INSTALL_DIR="/usr/local/bin"
 CONFIG_DIR="$HOME/.config/gt-customterminal"
@@ -1432,9 +1431,9 @@ check_updates() {
     local latest_version="$current_version"
 
     if command -v curl &> /dev/null; then
-        latest_version=$(curl -s --connect-timeout 5 "$REPO_URL/raw/main/version.txt" 2>/dev/null || echo "$current_version")
+        latest_version=$(curl -s --connect-timeout 5 "https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/version.txt" 2>/dev/null || echo "$current_version")
     elif command -v wget &> /dev/null; then
-        latest_version=$(wget -qO- --timeout=5 "$REPO_URL/raw/main/version.txt" 2>/dev/null || echo "$current_version")
+        latest_version=$(curl -s --connect-timeout 5 "https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/version.txt" 2>/dev/null || echo "$current_version")
     fi
 
     latest_version=$(echo "$latest_version" | grep -v '^<' | head -1 | tr -d '[:space:]')

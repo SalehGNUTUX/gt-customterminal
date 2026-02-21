@@ -16,13 +16,16 @@
 
 # النسخة العربية
 ```bash
-curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/blob/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/install.sh | bash
 ```
 # النسخة الإنجليزية (نفس الأمر)
 ```bash
-curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/blob/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/install.sh | bash
 ```
-
+# باستخدام wget
+```bash
+wget -qO- https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/install.sh | bash
+```
 ### 2. تنزيل وتثبيت يدوي
 
 # تنزيل السكربت

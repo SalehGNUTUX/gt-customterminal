@@ -38,47 +38,66 @@ read -p "Choice [1-2]: " lang_choice
 case $lang_choice in
     1)
         LANG_MODE="AR"
-        echo -e "${GREEN}✓${NC} تم اختيار اللغة العربية"
         AR_MODE=true
+        echo -e "${GREEN}✓${NC} تم اختيار اللغة العربية"
+        MSG_CHECK="🔍 جاري التحقق من الاتصال بالإنترنت..."
+        MSG_CONNECTION_OK="✅ الاتصال بالإنترنت جيد"
+        MSG_NO_INTERNET="❌ لا يوجد اتصال بالإنترنت"
+        MSG_CREATE_DIR="📁 جاري إنشاء مجلد التثبيت..."
+        MSG_DOWNLOADING="📥 جاري تنزيل ملفات الأداة..."
+        MSG_DOWNLOAD_SUCCESS="✅ تم تنزيل جميع الملفات بنجاح"
+        MSG_DOWNLOAD_FAILED="❌ فشل في تنزيل الملف:"
+        MSG_STARTING="🚀 جاري تشغيل الأداة محلياً..."
+        MSG_FILES_LIST="الملفات التي تم تنزيلها:"
+        MSG_README="📖 تم تنزيل ملف README.md"
+        MSG_MAIN_SCRIPT="📜 تم تنزيل السكربت الرئيسي"
+        MSG_UNINSTALL="🗑️  تم تنزيل سكربت الإزالة"
+        MSG_VERSION="🔢 تم إنشاء ملف الإصدار"
+        MSG_RUNNING="الآن سيتم تشغيل الأداة من مجلد التثبيت المحلي"
+        MSG_INSTALL_NOTE="بعد التشغيل، يمكنك تثبيتها نظامياً باختيار 'y' عند السؤال"
         ;;
     2)
         LANG_MODE="EN"
-        echo -e "${GREEN}✓${NC} English language selected"
         AR_MODE=false
+        echo -e "${GREEN}✓${NC} English language selected"
+        MSG_CHECK="🔍 Checking internet connection..."
+        MSG_CONNECTION_OK="✅ Internet connection OK"
+        MSG_NO_INTERNET="❌ No internet connection"
+        MSG_CREATE_DIR="📁 Creating installation directory..."
+        MSG_DOWNLOADING="📥 Downloading tool files..."
+        MSG_DOWNLOAD_SUCCESS="✅ All files downloaded successfully"
+        MSG_DOWNLOAD_FAILED="❌ Failed to download file:"
+        MSG_STARTING="🚀 Starting tool locally..."
+        MSG_FILES_LIST="Downloaded files:"
+        MSG_README="📖 Downloaded README.md"
+        MSG_MAIN_SCRIPT="📜 Downloaded main script"
+        MSG_UNINSTALL="🗑️  Downloaded uninstall script"
+        MSG_VERSION="🔢 Created version file"
+        MSG_RUNNING="Now running the tool from local installation directory"
+        MSG_INSTALL_NOTE="After running, you can install system-wide by pressing 'y' when prompted"
         ;;
     *)
         LANG_MODE="EN"
         AR_MODE=false
         echo -e "${YELLOW}⚠${NC} Using default language (English)"
+        # تعيين الرسائل الافتراضية للإنجليزية
+        MSG_CHECK="🔍 Checking internet connection..."
+        MSG_CONNECTION_OK="✅ Internet connection OK"
+        MSG_NO_INTERNET="❌ No internet connection"
+        MSG_CREATE_DIR="📁 Creating installation directory..."
+        MSG_DOWNLOADING="📥 Downloading tool files..."
+        MSG_DOWNLOAD_SUCCESS="✅ All files downloaded successfully"
+        MSG_DOWNLOAD_FAILED="❌ Failed to download file:"
+        MSG_STARTING="🚀 Starting tool locally..."
+        MSG_FILES_LIST="Downloaded files:"
+        MSG_README="📖 Downloaded README.md"
+        MSG_MAIN_SCRIPT="📜 Downloaded main script"
+        MSG_UNINSTALL="🗑️  Downloaded uninstall script"
+        MSG_VERSION="🔢 Created version file"
+        MSG_RUNNING="Now running the tool from local installation directory"
+        MSG_INSTALL_NOTE="After running, you can install system-wide by pressing 'y' when prompted"
         ;;
 esac
-
-# رسائل التثبيت
-if [ "$AR_MODE" = true ]; then
-    MSG_CHECK="🔍 جاري التحقق من الاتصال بالإنترنت..."
-    MSG_CONNECTION_OK="✅ الاتصال بالإنترنت جيد"
-    MSG_NO_INTERNET="❌ لا يوجد اتصال بالإنترنت"
-    MSG_CHECK_AGAIN="يرجى التحقق من الاتصال والمحاولة مرة أخرى"
-    MSG_DOWNLOADING="📥 جاري تنزيل ملفات التثبيت..."
-    MSG_DOWNLOAD_SUCCESS="✅ تم تنزيل جميع الملفات بنجاح"
-    MSG_DOWNLOAD_FAILED="❌ فشل في تنزيل الملف:"
-    MSG_NEED_CURL_WGET="❌ يحتاج curl أو wget للتنزيل"
-    MSG_INSTALL_CURL_WGET="يرجى تثبيت curl أو wget أولاً"
-    MSG_STARTING="🚀 جاري تشغيل الأداة..."
-    MSG_FILES_DOWNLOADED="الملفات التي تم تنزيلها:"
-else
-    MSG_CHECK="🔍 Checking internet connection..."
-    MSG_CONNECTION_OK="✅ Internet connection OK"
-    MSG_NO_INTERNET="❌ No internet connection"
-    MSG_CHECK_AGAIN="Please check your connection and try again"
-    MSG_DOWNLOADING="📥 Downloading installation files..."
-    MSG_DOWNLOAD_SUCCESS="✅ All files downloaded successfully"
-    MSG_DOWNLOAD_FAILED="❌ Failed to download file:"
-    MSG_NEED_CURL_WGET="❌ Need curl or wget for download"
-    MSG_INSTALL_CURL_WGET="Please install curl or wget first"
-    MSG_STARTING="🚀 Starting the tool..."
-    MSG_FILES_DOWNLOADED="Downloaded files:"
-fi
 
 # التحقق من الاتصال
 echo ""
@@ -86,112 +105,119 @@ print_info "$MSG_CHECK"
 
 if ! ping -c 1 github.com &> /dev/null && ! ping -c 1 raw.githubusercontent.com &> /dev/null; then
     print_error "$MSG_NO_INTERNET"
-    echo "$MSG_CHECK_AGAIN"
     exit 1
 fi
 
 print_success "$MSG_CONNECTION_OK"
 
 # التحقق من وجود curl أو wget
-HAS_CURL=false
-HAS_WGET=false
-
+DOWNLOAD_CMD=""
 if command -v curl &> /dev/null; then
-    HAS_CURL=true
+    DOWNLOAD_CMD="curl -s -f -L -o"
 elif command -v wget &> /dev/null; then
-    HAS_WGET=true
+    DOWNLOAD_CMD="wget -q -O"
 else
-    print_error "$MSG_NEED_CURL_WGET"
-    echo "$MSG_INSTALL_CURL_WGET"
+    print_error "❌ Need curl or wget for download"
     exit 1
 fi
 
-# إنشاء مجلد مؤقت
-TEMP_DIR="/tmp/gt-customterminal-install"
-mkdir -p "$TEMP_DIR"
-cd "$TEMP_DIR" || exit 1
+# إنشاء مجلد التثبيت في المنزل (وليس /tmp)
+INSTALL_DIR="$HOME/.local/share/gt-customterminal"
+mkdir -p "$INSTALL_DIR"
+cd "$INSTALL_DIR" || exit 1
+
+print_success "$MSG_CREATE_DIR"
+echo "   📂 $INSTALL_DIR"
 
 # قائمة الملفات المطلوبة
-FILES=(
-    "gt-customterminal.sh"
-    "install.sh"
-    "uninstall.sh"
-    "README.md"
-    "version.txt"
-)
-
-# روابط التحميل الصحيحة
 BASE_URL="https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main"
+FILES=(
+    "gt-customterminal.sh:main"
+    "uninstall.sh:uninstall"
+    "README.md:readme"
+)
 
 echo ""
 print_info "$MSG_DOWNLOADING"
 echo "════════════════════════════════════════════════════════════"
 
 # تنزيل الملفات
-SUCCESS_COUNT=0
-FAILED_FILES=""
-
-for file in "${FILES[@]}"; do
-    printf "📄 %-20s ... " "$file"
+for file_entry in "${FILES[@]}"; do
+    IFS=':' read -r filename filetype <<< "$file_entry"
     
-    if [ "$HAS_CURL" = true ]; then
-        if curl -s -f -o "$file" "$BASE_URL/$file" 2>/dev/null; then
+    printf "📄 %-20s ... " "$filename"
+    
+    if [ "$DOWNLOAD_CMD" = "curl -s -f -L -o" ]; then
+        if curl -s -f -L -o "$filename" "$BASE_URL/$filename" 2>/dev/null; then
             echo -e "${GREEN}✓${NC}"
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            chmod +x "$filename" 2>/dev/null
         else
             echo -e "${RED}✗${NC}"
-            FAILED_FILES="$FAILED_FILES $file"
+            FAILED=1
         fi
-    elif [ "$HAS_WGET" = true ]; then
-        if wget -q -O "$file" "$BASE_URL/$file" 2>/dev/null; then
+    else
+        if wget -q -O "$filename" "$BASE_URL/$filename" 2>/dev/null; then
             echo -e "${GREEN}✓${NC}"
-            SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+            chmod +x "$filename" 2>/dev/null
         else
             echo -e "${RED}✗${NC}"
-            FAILED_FILES="$FAILED_FILES $file"
+            FAILED=1
         fi
     fi
 done
 
+# إنشاء ملف الإصدار
+echo "1.0.4" > version.txt
+echo -e "🔢 version.txt           ... ${GREEN}✓${NC} (created locally)"
+
 echo "════════════════════════════════════════════════════════════"
 
-# إنشاء ملف version.txt إذا لم يتم تنزيله
-if [ ! -f "version.txt" ]; then
-    echo "1.0.4" > version.txt
-    SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-fi
-
-# التحقق من نجاح التحميل
-if [ $SUCCESS_COUNT -lt 4 ]; then
-    print_error "$MSG_DOWNLOAD_FAILED"
-    if [ "$AR_MODE" = true ]; then
-        echo "الملفات الفاشلة:$FAILED_FILES"
-        echo "يمكنك تنزيل الملفات يدوياً من:"
-        echo "  https://github.com/SalehGNUTUX/gt-customterminal"
-    else
-        echo "Failed files:$FAILED_FILES"
-        echo "You can download the files manually from:"
-        echo "  https://github.com/SalehGNUTUX/gt-customterminal"
-    fi
+# التحقق من وجود الملفات الأساسية
+if [ ! -f "gt-customterminal.sh" ]; then
+    print_error "$MSG_DOWNLOAD_FAILED gt-customterminal.sh"
     exit 1
 fi
 
 print_success "$MSG_DOWNLOAD_SUCCESS"
+echo ""
 
 # عرض الملفات المنزلة
-echo ""
-echo "$MSG_FILES_DOWNLOADED"
-ls -la --color=auto
+echo "$MSG_FILES_LIST"
+ls -la --color=always | head -10
 
 # حفظ إعداد اللغة
-echo "$LANG_MODE" > /tmp/gt-lang-temp
-
-# جعل الملفات قابلة للتنفيذ
-chmod +x gt-customterminal.sh install.sh uninstall.sh 2>/dev/null
+echo "$LANG_MODE" > "$INSTALL_DIR/.language"
 
 echo ""
-print_info "$MSG_STARTING"
-sleep 2
+echo "════════════════════════════════════════════════════════════"
+print_info "$MSG_RUNNING"
+echo "$MSG_INSTALL_NOTE"
+echo "════════════════════════════════════════════════════════════"
+echo ""
+sleep 3
 
-# تشغيل الأداة
+# تشغيل الأداة من الملف المحلي
+cd "$INSTALL_DIR"
 ./gt-customterminal.sh
+
+# إذا خرج المستخدم من الأداة، نعرض رسالة
+echo ""
+echo "════════════════════════════════════════════════════════════"
+if [ "$AR_MODE" = true ]; then
+    echo "📌 الأداة ما زالت مثبتة محلياً في:"
+    echo "   $INSTALL_DIR"
+    echo ""
+    echo "لتشغيلها مرة أخرى:"
+    echo "   $INSTALL_DIR/gt-customterminal.sh"
+    echo ""
+    echo "أو يمكنك تثبيتها نظامياً بتشغيلها واختيار 'y' عند السؤال"
+else
+    echo "📌 Tool is still installed locally in:"
+    echo "   $INSTALL_DIR"
+    echo ""
+    echo "To run it again:"
+    echo "   $INSTALL_DIR/gt-customterminal.sh"
+    echo ""
+    echo "Or install system-wide by running it and pressing 'y' when prompted"
+fi
+echo "════════════════════════════════════════════════════════════"

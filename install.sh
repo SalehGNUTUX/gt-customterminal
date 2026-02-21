@@ -3,7 +3,7 @@
 # ============================================
 # GT-customterminal Installer
 # Developer: SalehGNUTUX
-# Version: 1.0.4
+# Version: 1.0.5
 # ============================================
 
 # الألوان
@@ -23,7 +23,7 @@ print_info() { print_color "$BLUE" "🔍 $1"; }
 clear
 echo ""
 print_color "$CYAN" "════════════════════════════════════════════════════════════"
-print_color "$CYAN" "           🛠️  GT-customterminal Installer v1.0.4"
+print_color "$CYAN" "           🛠️  GT-customterminal Installer v1.0.5"
 print_color "$CYAN" "           👨‍💻  Developer: SalehGNUTUX"
 print_color "$CYAN" "           🌐  https://github.com/SalehGNUTUX/gt-customterminal"
 print_color "$CYAN" "════════════════════════════════════════════════════════════"
@@ -47,14 +47,14 @@ case $lang_choice in
         MSG_DOWNLOADING="📥 جاري تنزيل ملفات الأداة..."
         MSG_DOWNLOAD_SUCCESS="✅ تم تنزيل جميع الملفات بنجاح"
         MSG_DOWNLOAD_FAILED="❌ فشل في تنزيل الملف:"
-        MSG_STARTING="🚀 جاري تشغيل الأداة محلياً..."
+        MSG_ASK_SYSTEM_INSTALL="🔧 هل تريد تثبيت الأداة نظامياً (لتصبح الأوامر gt-terminal/gt-term متاحة في كل مكان)؟"
+        MSG_INSTALLING_SYSTEM="📦 جاري التثبيت النظامي..."
+        MSG_INSTALL_SUCCESS="✅ تم تثبيت الأداة نظامياً بنجاح!"
+        MSG_RUN_COMMANDS="يمكنك الآن تشغيل الأداة باستخدام: gt-terminal  أو  gt-term"
+        MSG_STARTING="🚀 جاري تشغيل الأداة..."
         MSG_FILES_LIST="الملفات التي تم تنزيلها:"
-        MSG_README="📖 تم تنزيل ملف README.md"
-        MSG_MAIN_SCRIPT="📜 تم تنزيل السكربت الرئيسي"
-        MSG_UNINSTALL="🗑️  تم تنزيل سكربت الإزالة"
-        MSG_VERSION="🔢 تم إنشاء ملف الإصدار"
-        MSG_RUNNING="الآن سيتم تشغيل الأداة من مجلد التثبيت المحلي"
-        MSG_INSTALL_NOTE="بعد التشغيل، يمكنك تثبيتها نظامياً باختيار 'y' عند السؤال"
+        MSG_RUNNING_LOCAL="🚀 جاري تشغيل الأداة محلياً..."
+        MSG_FINAL_NOTE="شكراً لاستخدامك GT-customterminal!"
         ;;
     2)
         LANG_MODE="EN"
@@ -67,20 +67,19 @@ case $lang_choice in
         MSG_DOWNLOADING="📥 Downloading tool files..."
         MSG_DOWNLOAD_SUCCESS="✅ All files downloaded successfully"
         MSG_DOWNLOAD_FAILED="❌ Failed to download file:"
-        MSG_STARTING="🚀 Starting tool locally..."
+        MSG_ASK_SYSTEM_INSTALL="🔧 Do you want to install the tool system-wide (so you can run 'gt-terminal' or 'gt-term' from anywhere)?"
+        MSG_INSTALLING_SYSTEM="📦 Installing system-wide..."
+        MSG_INSTALL_SUCCESS="✅ Tool installed system-wide successfully!"
+        MSG_RUN_COMMANDS="You can now run the tool using: gt-terminal  or  gt-term"
+        MSG_STARTING="🚀 Starting the tool..."
         MSG_FILES_LIST="Downloaded files:"
-        MSG_README="📖 Downloaded README.md"
-        MSG_MAIN_SCRIPT="📜 Downloaded main script"
-        MSG_UNINSTALL="🗑️  Downloaded uninstall script"
-        MSG_VERSION="🔢 Created version file"
-        MSG_RUNNING="Now running the tool from local installation directory"
-        MSG_INSTALL_NOTE="After running, you can install system-wide by pressing 'y' when prompted"
+        MSG_RUNNING_LOCAL="🚀 Running the tool locally..."
+        MSG_FINAL_NOTE="Thank you for using GT-customterminal!"
         ;;
     *)
         LANG_MODE="EN"
         AR_MODE=false
         echo -e "${YELLOW}⚠${NC} Using default language (English)"
-        # تعيين الرسائل الافتراضية للإنجليزية
         MSG_CHECK="🔍 Checking internet connection..."
         MSG_CONNECTION_OK="✅ Internet connection OK"
         MSG_NO_INTERNET="❌ No internet connection"
@@ -88,14 +87,14 @@ case $lang_choice in
         MSG_DOWNLOADING="📥 Downloading tool files..."
         MSG_DOWNLOAD_SUCCESS="✅ All files downloaded successfully"
         MSG_DOWNLOAD_FAILED="❌ Failed to download file:"
-        MSG_STARTING="🚀 Starting tool locally..."
+        MSG_ASK_SYSTEM_INSTALL="🔧 Do you want to install the tool system-wide (so you can run 'gt-terminal' or 'gt-term' from anywhere)?"
+        MSG_INSTALLING_SYSTEM="📦 Installing system-wide..."
+        MSG_INSTALL_SUCCESS="✅ Tool installed system-wide successfully!"
+        MSG_RUN_COMMANDS="You can now run the tool using: gt-terminal  or  gt-term"
+        MSG_STARTING="🚀 Starting the tool..."
         MSG_FILES_LIST="Downloaded files:"
-        MSG_README="📖 Downloaded README.md"
-        MSG_MAIN_SCRIPT="📜 Downloaded main script"
-        MSG_UNINSTALL="🗑️  Downloaded uninstall script"
-        MSG_VERSION="🔢 Created version file"
-        MSG_RUNNING="Now running the tool from local installation directory"
-        MSG_INSTALL_NOTE="After running, you can install system-wide by pressing 'y' when prompted"
+        MSG_RUNNING_LOCAL="🚀 Running the tool locally..."
+        MSG_FINAL_NOTE="Thank you for using GT-customterminal!"
         ;;
 esac
 
@@ -112,16 +111,19 @@ print_success "$MSG_CONNECTION_OK"
 
 # التحقق من وجود curl أو wget
 DOWNLOAD_CMD=""
+DOWNLOADER_NAME=""
 if command -v curl &> /dev/null; then
     DOWNLOAD_CMD="curl -s -f -L -o"
+    DOWNLOADER_NAME="curl"
 elif command -v wget &> /dev/null; then
     DOWNLOAD_CMD="wget -q -O"
+    DOWNLOADER_NAME="wget"
 else
     print_error "❌ Need curl or wget for download"
     exit 1
 fi
 
-# إنشاء مجلد التثبيت في المنزل (وليس /tmp)
+# إنشاء مجلد التثبيت المحلي
 INSTALL_DIR="$HOME/.local/share/gt-customterminal"
 mkdir -p "$INSTALL_DIR"
 cd "$INSTALL_DIR" || exit 1
@@ -142,12 +144,13 @@ print_info "$MSG_DOWNLOADING"
 echo "════════════════════════════════════════════════════════════"
 
 # تنزيل الملفات
+FAILED=0
 for file_entry in "${FILES[@]}"; do
     IFS=':' read -r filename filetype <<< "$file_entry"
     
     printf "📄 %-20s ... " "$filename"
     
-    if [ "$DOWNLOAD_CMD" = "curl -s -f -L -o" ]; then
+    if [ "$DOWNLOADER_NAME" = "curl" ]; then
         if curl -s -f -L -o "$filename" "$BASE_URL/$filename" 2>/dev/null; then
             echo -e "${GREEN}✓${NC}"
             chmod +x "$filename" 2>/dev/null
@@ -167,7 +170,7 @@ for file_entry in "${FILES[@]}"; do
 done
 
 # إنشاء ملف الإصدار
-echo "1.0.4" > version.txt
+echo "1.0.5" > version.txt
 echo -e "🔢 version.txt           ... ${GREEN}✓${NC} (created locally)"
 
 echo "════════════════════════════════════════════════════════════"
@@ -184,23 +187,68 @@ echo ""
 # عرض الملفات المنزلة
 echo "$MSG_FILES_LIST"
 ls -la --color=always | head -10
+echo ""
 
-# حفظ إعداد اللغة
+# سؤال المستخدم عن التثبيت النظامي
+echo "────────────────────────────────────────────────────────────"
+print_info "$MSG_ASK_SYSTEM_INSTALL"
+read -p "[y/N]: " system_install
+
+if [[ "$system_install" =~ ^[Yy]$ ]]; then
+    print_info "$MSG_INSTALLING_SYSTEM"
+    
+    # طلب صلاحيات sudo
+    sudo -v
+    if [ $? -ne 0 ]; then
+        print_error "❌ Failed to get sudo permissions. Cannot install system-wide."
+        print_warning "⚠ Continuing with local installation only."
+    else
+        # نسخ الملف الرئيسي إلى /usr/local/bin
+        sudo cp "$INSTALL_DIR/gt-customterminal.sh" "/usr/local/bin/gt-terminal"
+        sudo chmod +x "/usr/local/bin/gt-terminal"
+        
+        # إنشاء رابط رمزي قصير
+        sudo ln -sf "/usr/local/bin/gt-terminal" "/usr/local/bin/gt-term" 2>/dev/null
+        
+        print_success "$MSG_INSTALL_SUCCESS"
+        echo ""
+        echo "$MSG_RUN_COMMANDS"
+        echo ""
+        
+        # نسخ uninstall.sh إلى مكان مناسب (اختياري)
+        sudo cp "$INSTALL_DIR/uninstall.sh" "/usr/local/bin/gt-uninstall" 2>/dev/null
+        sudo chmod +x "/usr/local/bin/gt-uninstall" 2>/dev/null
+        
+        # حفظ إعداد اللغة في ملف الكونفيغ (للاستخدام المستقبلي)
+        mkdir -p "$HOME/.config/gt-customterminal"
+        echo "$LANG_MODE" > "$HOME/.config/gt-customterminal/language"
+        
+        # تشغيل الأداة
+        echo ""
+        print_info "$MSG_STARTING"
+        sleep 2
+        gt-terminal
+        
+        # بعد الخروج من الأداة، نعرض رسالة نهائية
+        echo ""
+        print_success "$MSG_FINAL_NOTE"
+        exit 0
+    fi
+fi
+
+# إذا لم يختر التثبيت النظامي أو فشل، نقوم بتشغيل الأداة محلياً
+echo ""
+print_info "$MSG_RUNNING_LOCAL"
+sleep 2
+
+# حفظ إعداد اللغة (للاستخدام المحلي)
 echo "$LANG_MODE" > "$INSTALL_DIR/.language"
 
-echo ""
-echo "════════════════════════════════════════════════════════════"
-print_info "$MSG_RUNNING"
-echo "$MSG_INSTALL_NOTE"
-echo "════════════════════════════════════════════════════════════"
-echo ""
-sleep 3
-
-# تشغيل الأداة من الملف المحلي
+# تشغيل الأداة
 cd "$INSTALL_DIR"
 ./gt-customterminal.sh
 
-# إذا خرج المستخدم من الأداة، نعرض رسالة
+# بعد الخروج من الأداة
 echo ""
 echo "════════════════════════════════════════════════════════════"
 if [ "$AR_MODE" = true ]; then
@@ -210,7 +258,7 @@ if [ "$AR_MODE" = true ]; then
     echo "لتشغيلها مرة أخرى:"
     echo "   $INSTALL_DIR/gt-customterminal.sh"
     echo ""
-    echo "أو يمكنك تثبيتها نظامياً بتشغيلها واختيار 'y' عند السؤال"
+    echo "أو يمكنك تثبيتها نظامياً بتشغيل هذا المثبت مرة أخرى واختيار 'y'"
 else
     echo "📌 Tool is still installed locally in:"
     echo "   $INSTALL_DIR"
@@ -218,6 +266,7 @@ else
     echo "To run it again:"
     echo "   $INSTALL_DIR/gt-customterminal.sh"
     echo ""
-    echo "Or install system-wide by running it and pressing 'y' when prompted"
+    echo "Or install system-wide by running this installer again and choosing 'y'"
 fi
 echo "════════════════════════════════════════════════════════════"
+print_success "$MSG_FINAL_NOTE"

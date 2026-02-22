@@ -12,25 +12,18 @@ TOOL_NAME="GT-customterminal"
 DEV_NAME="SalehGNUTUX"
 VERSION="1.0.4"
 REPO_URL="https://github.com/SalehGNUTUX/gt-customterminal"
-SCRIPT_URL="https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/gt-customterminal.sh"
+
 # المسارات
-INSTALL_DIR="/usr/local/bin"
 CONFIG_DIR="$HOME/.config/gt-customterminal"
 BACKUP_DIR="$CONFIG_DIR/backups"
 LOG_FILE="$CONFIG_DIR/gt-terminal.log"
 LANG_FILE="$CONFIG_DIR/language"
 VERSION_FILE="$CONFIG_DIR/version"
-SWAP_CONFIG="$CONFIG_DIR/swap-config"
-SCRIPT_PATH="$(realpath "$0")"
 
 # نظام اللغة
 LANG_MODE="AR"
 if [ -f "$LANG_FILE" ]; then
     LANG_MODE=$(cat "$LANG_FILE")
-elif [ -f "/tmp/gt-lang-temp" ]; then
-    LANG_MODE=$(cat "/tmp/gt-lang-temp")
-    echo "$LANG_MODE" > "$LANG_FILE"
-    rm -f "/tmp/gt-lang-temp"
 fi
 
 # الألوان
@@ -43,7 +36,7 @@ MAGENTA='\033[0;35m'
 NC='\033[0m'
 
 # ============================================
-# نظام الترجمة - كامل لكل لغة
+# نظام الترجمة
 # ============================================
 
 # رسائل بالعربية
@@ -127,17 +120,9 @@ AR_MESSAGES=(
     "current_lang_ar=اللغة الحالية: العربية"
     "change_to_en=التغيير إلى الإنجليزية؟"
     "lang_changed=✓ تم تغيير اللغة إلى الإنجليزية"
-    "install_system=🔧 جاري تثبيت الأداة نظامياً..."
-    "install_done=✓ تم تثبيت الأداة بنجاح!"
-    "run_options=🎯 يمكنك الآن تشغيل الأداة باستخدام:"
-    "path=📁 المسار:"
-    "config=⚙️  الإعدادات:"
     "run_now=هل تريد تشغيل الأداة الآن؟"
-    "direct_script=🔍 هذا هو السكربت المباشر، الأداة غير مثبتة نظامياً"
-    "install_system_wide=هل تريد التثبيت نظامياً لسهولة الوصول؟"
     "low_storage=⚠ مساحة التخزين منخفضة"
     "continue_anyway=المتابعة على أي حال؟"
-    "install_confirm=هذا سيثبت جميع الميزات خطوة بخطوة. المتابعة؟"
     "powerline_installing=📦 جاري تثبيت Powerline..."
     "powerline_done=✓ تم تثبيت وإعداد Powerline بنجاح"
     "powerline_exists=⚠ إعدادات Powerline موجودة مسبقاً"
@@ -185,6 +170,7 @@ AR_MESSAGES=(
     "mb=ميجابايت"
     "confirm_remove=هل تريد إزالة مساحة الإبدال؟"
     "operation_completed=✓ تمت العملية بنجاح"
+    "not_installed=⚠ الأداة غير مثبتة نظامياً. يرجى تشغيل المثبت أولاً: curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/git.sh | bash"
 )
 
 # رسائل بالإنجليزية
@@ -268,17 +254,9 @@ EN_MESSAGES=(
     "current_lang_en=Current language: English"
     "change_to_ar=Change to Arabic?"
     "lang_changed=✓ Language changed to Arabic"
-    "install_system=🔧 Installing tool system-wide..."
-    "install_done=✓ Tool installed successfully!"
-    "run_options=🎯 You can now run the tool using:"
-    "path=📁 Path:"
-    "config=⚙️  Config:"
     "run_now=Run the tool now?"
-    "direct_script=🔍 This is the direct script, tool is not installed system-wide"
-    "install_system_wide=Install system-wide for easy access?"
     "low_storage=⚠ Low storage space"
     "continue_anyway=Continue anyway?"
-    "install_confirm=This will install all features step by step. Continue?"
     "powerline_installing=📦 Installing Powerline..."
     "powerline_done=✓ Powerline installed and configured successfully"
     "powerline_exists=⚠ Powerline configuration already exists"
@@ -326,6 +304,7 @@ EN_MESSAGES=(
     "mb=MB"
     "confirm_remove=Do you want to remove swap space?"
     "operation_completed=✓ Operation completed successfully"
+    "not_installed=⚠ Tool not installed system-wide. Please run the installer first: curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/git.sh | bash"
 )
 
 # دالة الترجمة
@@ -536,7 +515,7 @@ show_swap_status() {
             local total_mb=$(echo "$swap_total" | sed 's/[^0-9.]//g')
             local used_mb=$(echo "$swap_used" | sed 's/[^0-9.]//g')
 
-            if [[ "$total_mb" =~ ^[0-9.]+$ ]] && [[ "$used_mb" =~ ^[0-9.]+$ ]] && [ $(echo "$total_mb > 0" | bc -l 2>/dev/null || echo "0") = "1" ]; then
+            if [[ "$total_mb" =~ ^[0-9.]+$ ]] && [[ "$used_mb" =~ ^[0-9.]+$ ]] && [ $(echo "$total_mb > 0" | bc -l 2>/dev/null) = "1" ]; then
                 local percent=$(echo "scale=1; $used_mb * 100 / $total_mb" | bc 2>/dev/null || echo "0")
                 echo "$(translate "swap_percent") ${percent}%"
             fi
@@ -602,9 +581,6 @@ setup_zram() {
     fi
 
     # تهيئة ZRAM
-    local mem_kb=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-    local zram_size=$((swap_size * 1024 * 1024)) # تحويل إلى كيلوبايت
-
     # إنشاء ملف إعدادات ZRAM
     sudo tee /etc/default/zram-swap << EOF
 # ZRAM configuration - GT-customterminal
@@ -758,18 +734,36 @@ uninstall_tool() {
         return
     fi
 
-    # إزالة الملفات النظامية
-    if [ -f "$INSTALL_DIR/gt-terminal" ]; then
-        sudo rm -f "$INSTALL_DIR/gt-terminal"
-        print_success "$(if [ "$LANG_MODE" = "EN" ]; then echo "Removed: $INSTALL_DIR/gt-terminal"; else echo "تم إزالة: $INSTALL_DIR/gt-terminal"; fi)"
+    # التحقق مما إذا كانت الأداة مثبتة نظامياً
+    INSTALL_DIR="/usr/local/bin"
+    SYSTEM_INSTALLED=false
+    
+    if [ -f "$INSTALL_DIR/gt-terminal" ] || [ -f "/usr/local/bin/gt-term" ]; then
+        SYSTEM_INSTALLED=true
     fi
 
-    if [ -f "/usr/local/bin/gt-term" ]; then
-        sudo rm -f "/usr/local/bin/gt-term"
-        print_success "$(if [ "$LANG_MODE" = "EN" ]; then echo "Removed: /usr/local/bin/gt-term"; else echo "تم إزالة: /usr/local/bin/gt-term"; fi)"
+    if [ "$SYSTEM_INSTALLED" = false ]; then
+        print_warning "الأداة غير مثبتة نظامياً. سيتم حذف الملفات المحلية فقط."
+    fi
+
+    # إزالة الملفات النظامية إذا كانت موجودة
+    if [ "$SYSTEM_INSTALLED" = true ]; then
+        echo ""
+        print_info "إزالة الملفات النظامية..."
+        
+        if [ -f "$INSTALL_DIR/gt-terminal" ]; then
+            sudo rm -f "$INSTALL_DIR/gt-terminal"
+            print_success "$(if [ "$LANG_MODE" = "EN" ]; then echo "Removed: $INSTALL_DIR/gt-terminal"; else echo "تم إزالة: $INSTALL_DIR/gt-terminal"; fi)"
+        fi
+
+        if [ -f "/usr/local/bin/gt-term" ]; then
+            sudo rm -f "/usr/local/bin/gt-term"
+            print_success "$(if [ "$LANG_MODE" = "EN" ]; then echo "Removed: /usr/local/bin/gt-term"; else echo "تم إزالة: /usr/local/bin/gt-term"; fi)"
+        fi
     fi
 
     # سؤال عن إبقاء ملفات الإعدادات
+    echo ""
     if [ "$LANG_MODE" = "EN" ]; then
         read -p "$(translate "keep_config") (y/n): " keep_config
     else
@@ -792,7 +786,7 @@ uninstall_tool() {
 }
 
 # ============================================
-# وظائف التثبيت
+# وظائف التثبيت (تعديل: إزالة التثبيت الذاتي)
 # ============================================
 
 # تثبيت Powerline
@@ -1029,7 +1023,7 @@ install_helpers() {
     fi
 }
 
-# تخصيص الطرفية (بدون مشاكل في عرض القرص)
+# تخصيص الطرفية
 customize_terminal() {
     print_info "$(translate "customizing") $(if [ "$LANG_MODE" = "EN" ]; then echo "terminal appearance"; else echo "مظهر الطرفية"; fi)"
 
@@ -1150,7 +1144,7 @@ echo -e "👥 \033[1;34mالمستخدمون:\033[0m        \033[1;32m$(who | wc
 echo'
             fi
             ;;
-                5)
+        5)
             if [ "$LANG_MODE" = "EN" ]; then
                 welcome_message='echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
 echo -e "\033[1;36m              🚀 SYSTEM DASHBOARD\033[0m"
@@ -1165,9 +1159,7 @@ echo -e "💾  \033[1;34mSwap:\033[0m    \033[1;32m$(free -h | grep -i swap | aw
 echo -e "📅  \033[1;34mDate:\033[0m    \033[1;32m$(date +"%Y-%m-%d %H:%M:%S")\033[0m"
 echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"'
             else
-                # Arabic version - Title in Arabic, content in English
-                welcome_message='{
-echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
+                welcome_message='echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
 echo -e "\033[1;36m              🚀 لوحة معلومات النظام الشاملة\033[0m"
 echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
 echo -e "👤  \033[1;34mUser:\033[0m    \033[1;32m$(whoami)\033[0m"
@@ -1178,8 +1170,7 @@ echo -e "🔥  \033[1;34mCPU:\033[0m     \033[1;32m$(top -bn1 | grep "Cpu(s)" | 
 echo -e "💾  \033[1;34mRAM:\033[0m     \033[1;32m$(free -m | awk "/Mem:/ {printf \"%d/%dMB\", \$3, \$2}")\033[0m"
 echo -e "💾  \033[1;34mSwap:\033[0m    \033[1;32m$(free -h | grep -i swap | awk "{print \$3 \"/\" \$2}" || echo "0/0")\033[0m"
 echo -e "📅  \033[1;34mDate:\033[0m    \033[1;32m$(date +"%Y-%m-%d %H:%M:%S")\033[0m"
-echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"
-}'
+echo -e "\033[1;36m════════════════════════════════════════════════════════════\033[0m"'
             fi
             ;;
         C|c)
@@ -1244,12 +1235,7 @@ EOF
     echo "═════════════════════════════════════════"
 
     # تشغيل الرسالة الترحيبية في بيئة محمية
-    if [[ "$welcome_message" == *"SWAP_INFO"* ]]; then
-        # بالنسبة للنمط الخامس، استخدم eval مع بيئة محمية
-        eval "$(echo "$welcome_message" | sed '/SWAP_INFO=/d')"
-    else
-        eval "$welcome_message"
-    fi
+    eval "$welcome_message" 2>/dev/null || echo "Preview not available"
 
     echo "═════════════════════════════════════════"
 
@@ -1279,7 +1265,7 @@ security_settings() {
             echo ""
             echo "$(translate "recent_logins")"
             echo "─────────────────────────────────────────"
-            last -10
+            last -10 2>/dev/null || echo "No login history available"
             echo "─────────────────────────────────────────"
             ;;
         2)
@@ -1300,7 +1286,7 @@ security_settings() {
             echo ""
             echo "$(translate "network_connections")"
             echo "─────────────────────────────────────────"
-            netstat -tulpn 2>/dev/null | head -20 || ss -tulpn 2>/dev/null | head -20
+            netstat -tulpn 2>/dev/null | head -20 || ss -tulpn 2>/dev/null | head -20 || echo "Network information not available"
             echo "─────────────────────────────────────────"
             ;;
         4)
@@ -1310,13 +1296,13 @@ security_settings() {
             pkg_manager=$(detect_package_manager)
             case $pkg_manager in
                 apt)
-                    apt update && apt list --upgradable
+                    sudo apt update && apt list --upgradable 2>/dev/null | head -20
                     ;;
                 pacman)
-                    pacman -Qu
+                    pacman -Qu 2>/dev/null | head -20
                     ;;
                 dnf|yum)
-                    dnf check-update || yum check-update
+                    dnf check-update 2>/dev/null | head -20 || yum check-update 2>/dev/null | head -20
                     ;;
                 *)
                     print_warning "$(translate "error") $(if [ "$LANG_MODE" = "EN" ]; then echo "Cannot check updates automatically"; else echo "لا يمكن التحقق من التحديثات تلقائياً"; fi)"
@@ -1329,11 +1315,11 @@ security_settings() {
             echo "─────────────────────────────────────────"
 
             if command -v ufw &> /dev/null; then
-                sudo ufw status verbose
+                sudo ufw status verbose 2>/dev/null || echo "UFW status unknown"
             elif command -v firewall-cmd &> /dev/null; then
-                sudo firewall-cmd --state
+                sudo firewall-cmd --state 2>/dev/null || echo "Firewall status unknown"
             elif command -v iptables &> /dev/null; then
-                sudo iptables -L -n | head -30
+                sudo iptables -L -n 2>/dev/null | head -30 || echo "IPTables status unknown"
             else
                 print_warning "$(translate "no_firewall")"
             fi
@@ -1402,7 +1388,7 @@ show_restore_menu() {
                 echo "$(translate "change_log")"
                 echo "═════════════════════════════════════════"
                 if [ -f "$LOG_FILE" ]; then
-                    cat "$LOG_FILE"
+                    tail -50 "$LOG_FILE"
                 else
                     echo "$(translate "no_changes")"
                 fi
@@ -1433,7 +1419,7 @@ check_updates() {
     if command -v curl &> /dev/null; then
         latest_version=$(curl -s --connect-timeout 5 "https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/version.txt" 2>/dev/null || echo "$current_version")
     elif command -v wget &> /dev/null; then
-        latest_version=$(curl -s --connect-timeout 5 "https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/version.txt" 2>/dev/null || echo "$current_version")
+        latest_version=$(wget -qO- --timeout=5 "https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/version.txt" 2>/dev/null || echo "$current_version")
     fi
 
     latest_version=$(echo "$latest_version" | grep -v '^<' | head -1 | tr -d '[:space:]')
@@ -1447,69 +1433,12 @@ check_updates() {
         read -p "$(translate "update_confirm") (y/n): " update_choice
 
         if [ "$update_choice" = "y" ] || [ "$update_choice" = "Y" ]; then
-            update_tool
+            # تنزيل النسخة الجديدة من git.sh الذي سيقوم بالتحديث
+            print_info "Please run the installer again to update:"
+            echo "curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/git.sh | bash"
         fi
     else
         print_success "$(translate "latest_version") ($current_version)"
-    fi
-}
-
-# تحديث الأداة
-update_tool() {
-    print_info "$(translate "updating") $(if [ "$LANG_MODE" = "EN" ]; then echo "the tool"; else echo "الأداة"; fi)"
-
-    local temp_dir="/tmp/gt-customterminal-update"
-    rm -rf "$temp_dir"
-    mkdir -p "$temp_dir"
-
-    if command -v curl &> /dev/null; then
-        if curl -s "$SCRIPT_URL" -o "$temp_dir/gt-customterminal.sh"; then
-            print_success "$(translate "success") $(if [ "$LANG_MODE" = "EN" ]; then echo "File downloaded successfully"; else echo "تم تنزيل الملف بنجاح"; fi)"
-        else
-            print_error "$(translate "update_failed")"
-            return 1
-        fi
-    elif command -v wget &> /dev/null; then
-        if wget -q "$SCRIPT_URL" -O "$temp_dir/gt-customterminal.sh"; then
-            print_success "$(translate "success") $(if [ "$LANG_MODE" = "EN" ]; then echo "File downloaded successfully"; else echo "تم تنزيل الملف بنجاح"; fi)"
-        else
-            print_error "$(translate "update_failed")"
-            return 1
-        fi
-    else
-        print_error "$(translate "error") $(if [ "$LANG_MODE" = "EN" ]; then echo "Cannot update - need curl or wget"; else echo "لا يمكن التحديث - يحتاج curl أو wget"; fi)"
-        return 1
-    fi
-
-    if [ -f "$temp_dir/gt-customterminal.sh" ]; then
-        if [ -f "$INSTALL_DIR/gt-terminal" ]; then
-            backup_file "$INSTALL_DIR/gt-terminal" "Before updating"
-        fi
-
-        sudo cp "$temp_dir/gt-customterminal.sh" "$INSTALL_DIR/gt-terminal"
-        sudo chmod +x "$INSTALL_DIR/gt-terminal"
-
-        # تحديث رقم الإصدار من الملف المنزّل
-        local downloaded_version=$(grep -m1 "VERSION=" "$temp_dir/gt-customterminal.sh" | cut -d'"' -f2)
-        if [ -n "$downloaded_version" ]; then
-            echo "$downloaded_version" > "$VERSION_FILE"
-            VERSION="$downloaded_version"
-        fi
-
-        sudo ln -sf "$INSTALL_DIR/gt-terminal" "/usr/local/bin/gt-term" 2>/dev/null
-
-        print_success "$(translate "update_done") $VERSION"
-        log "UPDATE: Updated to version $VERSION"
-
-        rm -rf "$temp_dir"
-
-        echo ""
-        print_info "$(translate "update_restart")"
-        sleep 2
-        exec "$INSTALL_DIR/gt-terminal"
-    else
-        print_error "$(translate "update_failed")"
-        return 1
     fi
 }
 
@@ -1557,72 +1486,46 @@ change_language() {
 
 # التحقق من النظام
 pre_install_check() {
-    echo "$(translate "need_sudo")"
-
-    if ! sudo -n true 2>/dev/null; then
-        sudo -v
-        if [ $? -ne 0 ]; then
-            print_error "$(translate "error") $(if [ "$LANG_MODE" = "EN" ]; then echo "Failed to get sudo permissions"; else echo "فشل في الحصول على صلاحيات sudo"; fi)"
-            exit 1
+    if command -v sudo &> /dev/null; then
+        if ! sudo -n true 2>/dev/null; then
+            print_info "$(translate "need_sudo")"
+            sudo -v
+            if [ $? -ne 0 ]; then
+                print_warning "Some features may not work without sudo permissions"
+            fi
         fi
     fi
 
+    # التحقق من مساحة التخزين (اختياري)
     if command -v df &> /dev/null; then
         local available_space=$(df / | awk 'NR==2 {print $4}')
         if [ "$available_space" -lt 50000 ]; then
             print_warning "$(translate "low_storage")"
-
-            read -p "$(translate "continue_anyway") (y/n): " continue_choice
-
-            [ "$continue_choice" != "y" ] && exit 1
         fi
     fi
 }
 
-# التثبيت الذاتي
-self_install() {
-    print_info "$(translate "install_system")"
-
-    sudo -v
-    if [ $? -ne 0 ]; then
-        print_error "$(translate "error") $(if [ "$LANG_MODE" = "EN" ]; then echo "Failed to get sudo permissions"; else echo "فشل في الحصول على صلاحيات sudo"; fi)"
-        return 1
-    fi
-
-    # حفظ المسار الحالي للنسخ الاحتياطي
-    local current_script="$SCRIPT_PATH"
-
-    if [ ! -f "$current_script" ]; then
-        current_script="$0"
-    fi
-
-    # إنشاء نسخة احتياطية من الملف الحالي
-    local backup_file="/tmp/gt-customterminal-backup.sh"
-    cp "$current_script" "$backup_file"
-
-    # استخدام النسخة الاحتياطية للتثبيت
-    sudo cp "$backup_file" "$INSTALL_DIR/gt-terminal"
-    sudo chmod +x "$INSTALL_DIR/gt-terminal"
-
-    sudo ln -sf "$INSTALL_DIR/gt-terminal" "/usr/local/bin/gt-term" 2>/dev/null
-
-    print_success "$(translate "install_done")"
-
-    echo ""
-    echo "$(translate "run_options")"
-    echo "   gt-terminal"
-    echo "   gt-term"
-    echo ""
-    echo "$(translate "path") $INSTALL_DIR/gt-terminal"
-    echo "$(translate "config") $CONFIG_DIR"
-    echo ""
-    read -p "$(translate "run_now") (y/n): " run_choice
-
-    if [ "$run_choice" = "y" ] || [ "$run_choice" = "Y" ]; then
-        exec gt-terminal
-    else
+# التحقق من التثبيت النظامي (وظيفة جديدة)
+check_system_installation() {
+    if [ ! -f "/usr/local/bin/gt-terminal" ] && [ ! -f "/usr/local/bin/gt-term" ]; then
+        # الأداة غير مثبتة نظامياً
+        if [ "$LANG_MODE" = "EN" ]; then
+            print_warning "Tool is not installed system-wide."
+            echo ""
+            echo "To install it system-wide, please run:"
+            echo "  curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/git.sh | bash"
+            echo ""
+            echo "Continuing in local mode..."
+        else
+            print_warning "الأداة غير مثبتة نظامياً."
+            echo ""
+            echo "لتثبيتها نظامياً، يرجى تشغيل:"
+            echo "  curl -sSL https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main/git.sh | bash"
+            echo ""
+            echo "جارٍ التشغيل في الوضع المحلي..."
+        fi
         echo ""
-        print_info "$(translate "restart_terminal")"
+        sleep 2
     fi
 }
 
@@ -1653,21 +1556,11 @@ ${CYAN}$(if [ "$LANG_MODE" = "EN" ]; then echo "Language: English (EN)"; else ec
 main() {
     init_system
 
-    # إذا كان السكربت يُشغل مباشرة ولم يكن مثبتاً نظامياً
-    if [[ "$0" == *"gt-customterminal.sh" ]] && [ ! -f "$INSTALL_DIR/gt-terminal" ]; then
-        echo ""
-        print_color "$YELLOW" "$(translate "direct_script")"
-        echo ""
+    # التحقق من التثبيت النظامي (وظيفة جديدة)
+    check_system_installation
 
-        read -p "$(translate "install_system_wide") (y/n): " install_choice
-
-        if [ "$install_choice" = "y" ] || [ "$install_choice" = "Y" ]; then
-            self_install
-            exit 0
-        fi
-    fi
-
-    if [ -f "$INSTALL_DIR/gt-terminal" ]; then
+    # التحقق من التحديثات إذا كانت الأداة مثبتة نظامياً
+    if [ -f "/usr/local/bin/gt-terminal" ]; then
         check_updates
         echo ""
     fi
@@ -1692,7 +1585,7 @@ main() {
             5) security_settings ;;
             6) install_all ;;
             7) show_restore_menu ;;
-            8) update_tool ;;
+            8) check_updates ;;  # تعديل: استدعاء check_updates بدلاً من update_tool
             9) change_language ;;
             10) swap_management_menu ;;
             11) uninstall_tool ;;

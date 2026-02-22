@@ -32,6 +32,19 @@ print_warning() { echo -e "${YELLOW}⚠ $1${NC}"; }
 print_info()    { echo -e "${BLUE}➜ $1${NC}"; }
 print_step()    { echo -e "${CYAN}[*] $1${NC}"; }
 
+# قراءة آمنة تعمل مع curl | bash
+safe_read() {
+    local prompt="$1"
+    local varname="$2"
+    local answer
+    if [ -t 0 ]; then
+        read -p "$prompt" answer
+    else
+        read -p "$prompt" answer < /dev/tty
+    fi
+    eval "$varname=\$answer"
+}
+
 # ============================================
 # الشعار
 # ============================================
@@ -54,7 +67,7 @@ select_language() {
     echo "   1) 🇸🇦 العربية (AR)"
     echo "   2) 🇺🇸 English (EN)"
     echo ""
-    read -p "Choice [1-2] (default: 2): " lang_choice
+    safe_read "Choice [1-2] (default: 2): " lang_choice
 
     case $lang_choice in
         1)
@@ -280,7 +293,7 @@ handle_existing_install() {
     echo "$(msg opt_remove)"
     echo "$(msg opt_cancel)"
     echo ""
-    read -p "Choice [1-4]: " action_choice
+    safe_read "Choice [1-4]: " action_choice
 
     case $action_choice in
         1)
@@ -299,7 +312,7 @@ handle_existing_install() {
             # إزالة كاملة ثم تثبيت جديد
             remove_old
             # حذف الإعدادات
-            read -p "$(if [ "$LANG_MODE" = "AR" ]; then echo "هل تريد حذف ملفات الإعدادات أيضاً؟ (y/n): "; else echo "Also remove configuration files? (y/n): "; fi)" rm_config
+            safe_read "$(if [ "$LANG_MODE" = "AR" ]; then echo "هل تريد حذف ملفات الإعدادات أيضاً؟ (y/n): "; else echo "Also remove configuration files? (y/n): "; fi)" rm_config
             if [ "$rm_config" = "y" ] || [ "$rm_config" = "Y" ]; then
                 rm -rf "$CONFIG_DIR"
                 print_success "$(if [ "$LANG_MODE" = "AR" ]; then echo "تم حذف ملفات الإعدادات"; else echo "Configuration files removed"; fi)"
@@ -319,7 +332,7 @@ handle_existing_install() {
 # تشغيل الأداة
 # ============================================
 launch_tool() {
-    read -p "$(msg launch_now)" launch_choice
+    safe_read "$(msg launch_now)" launch_choice
     if [ "$launch_choice" = "y" ] || [ "$launch_choice" = "Y" ]; then
         exec gt-terminal
     else

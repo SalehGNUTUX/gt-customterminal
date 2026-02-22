@@ -28,6 +28,11 @@ print_color "$CYAN" "           👨‍💻  Developer: SalehGNUTUX"
 print_color "$CYAN" "════════════════════════════════════════════════════════════"
 echo ""
 
+# تحديد المسار الحالي (الدليل المؤقت)
+CURRENT_DIR="$(pwd)"
+echo "📂 Current directory: $CURRENT_DIR"
+echo ""
+
 # اختيار اللغة
 echo "🌐 Please select language / الرجاء اختيار اللغة:"
 echo "1) 🇸🇦 العربية (AR)"

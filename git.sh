@@ -3,7 +3,7 @@
 # ============================================
 # GT-customterminal Git Puller
 # Developer: SalehGNUTUX
-# Version: 1.0.0
+# Version: 1.0.1
 # ============================================
 
 # الألوان
@@ -23,7 +23,7 @@ print_info() { print_color "$BLUE" "🔍 $1"; }
 clear
 echo ""
 print_color "$CYAN" "════════════════════════════════════════════════════════════"
-print_color "$CYAN" "           📥 GT-customterminal Git Puller v1.0.0"
+print_color "$CYAN" "           📥 GT-customterminal Git Puller v1.0.1"
 print_color "$CYAN" "           👨‍💻  Developer: SalehGNUTUX"
 print_color "$CYAN" "           🌐  https://github.com/SalehGNUTUX/gt-customterminal"
 print_color "$CYAN" "════════════════════════════════════════════════════════════"
@@ -60,10 +60,10 @@ print_success "Created temporary directory: $TEMP_DIR"
 # قائمة الملفات المطلوبة
 BASE_URL="https://raw.githubusercontent.com/SalehGNUTUX/gt-customterminal/main"
 FILES=(
-    "gt-customterminal.sh:main"
-    "install.sh:installer"
-    "uninstall.sh:uninstall"
-    "README.md:readme"
+    "gt-customterminal.sh"
+    "install.sh"
+    "uninstall.sh"
+    "README.md"
 )
 
 echo ""
@@ -72,9 +72,7 @@ echo "════════════════════════�
 
 # تنزيل الملفات
 FAILED=0
-for file_entry in "${FILES[@]}"; do
-    IFS=':' read -r filename filetype <<< "$file_entry"
-    
+for filename in "${FILES[@]}"; do
     printf "📄 %-20s ... " "$filename"
     
     if [ "$DOWNLOADER_NAME" = "curl" ]; then
@@ -110,12 +108,25 @@ fi
 print_success "All files downloaded successfully!"
 echo ""
 echo "Downloaded files:"
-ls -la --color=always | head -10
+ls -la --color=always
 echo ""
 
-# تشغيل المثبت المحلي
+# تأكيد قبل المتابعة
 echo "────────────────────────────────────────────────────────────"
-print_info "Starting local installer..."
-sleep 2
+print_info "Ready to start the installation process."
+read -p "Press Enter to continue or Ctrl+C to cancel... " dummy
 
-exec ./install.sh
+# تشغيل المثبت المحلي من نفس المجلد
+echo ""
+print_info "Starting local installer..."
+sleep 1
+
+# تشغيل install.sh مباشرة (بدون exec) ولكن في نفس المجلد
+./install.sh
+
+# بعد انتهاء install.sh، نعود هنا
+echo ""
+print_info "Installation process completed."
+echo "You can find the downloaded files in: $TEMP_DIR"
+echo "These files will be deleted when you reboot."
+echo ""
